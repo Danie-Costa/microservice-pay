@@ -18,6 +18,7 @@ return new class extends Migration {
             // Se quiser criar uma foreign key com a tabela projects:
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
         });
+        
     }
 
     public function down(): void
