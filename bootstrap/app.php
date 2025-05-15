@@ -16,8 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'CustomCorsMiddleware' => \App\Http\Middleware\CustomCorsMiddleware::class,
         ]);
         $middleware->validateCsrfTokens(except: [
-            // 'webhook/notification',
-            // '/webhook/notification',
             'api/*',
         ]);
     })

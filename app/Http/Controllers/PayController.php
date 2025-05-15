@@ -8,8 +8,9 @@ use App\Models\Vendor;
 use App\Models\Payment;
 use App\Http\Controllers\Controller;
 use App\Services\MercadoPagoService;
-use Illuminate\Support\Facades\Log;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PayController extends Controller
 {
@@ -132,6 +133,7 @@ class PayController extends Controller
     }
     public function notification(Request $request)
     {
+        Log::info('Informação registrada no log.');
         $paymentId = $request->input('data.id');
         if (!$paymentId) {
             return response()->json(['message' => 'Notificação sem ID de pagamento'], 400);
@@ -142,11 +144,12 @@ class PayController extends Controller
             return response()->json(['message' => 'Falha ao buscar dados do pagamento'], 500);
         }
 
-        $payment = Payment::where('internal_reference', $paymentData->internal_reference)->first();
+        $payment = Payment::where('internal_reference', $paymentData->external_reference)->first();
         if (!$payment) {
             return response()->json(['message' => 'Pagamento não encontrado'], 404);
         }
-
+Log::info('Informação registrada no log.'.$paymentData->status);
+     
         $payment->update([
             'payment_id' => $paymentId,
             'status' => $paymentData->status,
