@@ -1,36 +1,37 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ImageController;
-use App\Http\Controllers\FileController;
-use App\Http\Controllers\GalleryController;
-
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\PayController;
+use App\Http\Middleware\CheckProjectAccess;
+use App\Http\Middleware\CustomCorsMiddleware;
 Route::get('/', function () {
     return response()->json([
         'status' => 'success'
     ]);
 });
 
-// Rotas para arquivos
-Route::prefix('files')->group(function () {
-    Route::post('/', [FileController::class, 'store']); // Criar arquivo
-    Route::get('/', [FileController::class, 'index']); // Listar arquivos por token e parâmetros opcionais
-    Route::delete('/{id}', [FileController::class, 'destroy']); // Deletar arquivo por ID + token
+
+// Route::get('/vendor/auth-url', [VendorController::class, 'authUrl']); // link para o cliente acessar o MP
+// Route::get('/vendor/oauth/callback', [VendorController::class, 'oauthCallback']); // callback do MP onde o cliente vai receber o token de acesso
+
+Route::middleware([CustomCorsMiddleware::class,CheckProjectAccess::class])->group(function () {
+    Route::get('/vendor', [VendorController::class, 'index']);
+    Route::post('/vendor', [VendorController::class, 'store']);
+    Route::get('/vendor/{id}', [VendorController::class, 'show']);
+    Route::put('/vendor/{id}', [VendorController::class, 'update']);
+    Route::delete('/vendor/{id}', [VendorController::class, 'destroy']);
+
+    Route::post('/vendor/newpayment/{id}', [PayController::class, 'store']);
+    Route::get('/vendor/payments/{id}', [PayController::class, 'listByVendor']);
+    Route::get('/vendor/payment/{id}/{paymentId}', [PayController::class, 'show']);
 });
 
-// Rotas para imagens
-Route::prefix('images')->group(function () {
-    Route::post('/', [ImageController::class,'store']); // Criar imagem
-    Route::get('/', [ImageController::class,'index']); // Listar imagens por token e parâmetros opcionais
-    Route::delete('/{id}', [ImageController::class,'destroy']); // Deletar imagem por ID + token
-});
-
-// Rotas para galerias
-Route::prefix('galleries')->group(function () {
-    Route::post('/', [GalleryController::class,'store']); // Criar galeria
-    Route::get('/', [GalleryController::class,'index']); // Listar galerias por token e parâmetros opcionais
-    Route::delete('/{id}', [GalleryController::class,'destroy']); // Deletar galeria por ID + token
-});
-
-// Rota especial: listar todos os arquivos, imagens e galerias por token + external_reference
-Route::get('/all', 'ProjectAssetsController@index'); 
+/**
+ * Webhooks e retornos
+ */
+Route::middleware(['CustomCorsMiddleware'])->post('/payment/webhook', [PayController::class, 'notification'])->name('payment.notification');
+// Route::middleware(['CustomCorsMiddleware'])->post('/webhook/notification', [PayController::class, 'notification'])->name('client.webhook.notification');
+// Route::get('/payment/success/{internalReference}', [PayController::class, 'success'])->name('payment.success');
+// Route::get('/payment/failure/{internalReference}', [PayController::class, 'failure'])->name('payment.failure');
+// Route::get('/payment/pending/{internalReference}', [PayController::class, 'pending'])->name('payment.pending');

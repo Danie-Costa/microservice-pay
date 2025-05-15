@@ -8,19 +8,16 @@ class Project extends Model
 {
     protected $fillable = [
         'name',
-        'description',
-        'external_reference',
+        'token',
     ];
 
-    // Relação com Gallery
-    public function galleries()
+    public function vendor()
     {
-        return $this->hasMany(Gallery::class);
+        return $this->hasMany(Vendor::class);
     }
 
-    // Relação com Image
-    public function images()
+    public function payment()
     {
-        return $this->hasMany(Image::class);
+        return $this->hasMany(Payment::class);
     }
 }

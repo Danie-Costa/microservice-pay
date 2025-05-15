@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'CustomCorsMiddleware' => \App\Http\Middleware\CustomCorsMiddleware::class,
+        ]);
         $middleware->validateCsrfTokens(except: [
+            // 'webhook/notification',
+            // '/webhook/notification',
             'api/*',
         ]);
     })
