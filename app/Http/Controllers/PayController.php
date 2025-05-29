@@ -68,17 +68,10 @@ class PayController extends Controller
         $request['price_fee'] = $request->price * ($vendor->fee / 100);     
         $request['internal_reference'] = uniqid();
 
+ 
         $mpService = new MercadoPagoService();
-        $request['preference_id'] = $mpService->newPayment($request->title, $request->quantity, $request->price, $request->internal_reference);   
-        // $request->merge([
-        //     'mp_user_id' => $vendor->mp_user_id,
-        //     'mp_access_token' => $vendor->mp_access_token,
-        //     'mp_refresh_token' => $vendor->mp_refresh_token,
-        //     'mp_public_key' => $vendor->mp_public_key,
-        //     'mp_expires_in' => $vendor->mp_expires_in,
-        //     'mp_token_created_at' => $vendor->mp_token_created_at
-        // ]);
-    
+        $request['preference_id'] = $mpService->newPayment($request->title, $request->quantity, $request->price, $request->internal_reference,$vendor); 
+        Log::info('Informação registrada no log.'.json_encode($request['preference_id']));
         $vendorPayment = $vendor->payment()->create($request->except(['status','vendor_id','mp_user_id','mp_access_token',
         'mp_refresh_token','mp_public_key','mp_expires_in','mp_token_created_at']));
         $vendorPayment->fee = $vendorPayment->fee ; // Convert fee to percentage and normalize to two decimal places

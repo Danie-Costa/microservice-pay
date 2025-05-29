@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'mercadopago' => [
+        'client_id'     => env('MP_CLIENT_ID'),
+        'client_secret' => env('MP_CLIENT_SECRET'),
+    ],
 
 ];

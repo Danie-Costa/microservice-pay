@@ -4,7 +4,7 @@
 namespace App\Services;
 
 
-
+use Illuminate\Support\Facades\Log;
 class MercadoPagoService
 {
     protected $accessToken;
@@ -14,8 +14,9 @@ class MercadoPagoService
         $this->accessToken = getenv('MERCADOPAGO_ACCESS_TOKEN'); // ou use env('...') se estiver dentro de Laravel
     }
 
-    public function newPayment($title, $quantity, $unit_price, $internalReference)
+    public function newPayment($title, $quantity, $unit_price, $internalReference, $vendor = null) 
     {
+       
         $url = "https://api.mercadopago.com/checkout/preferences";
         // $back_urls = [
         //     "success" => route('payment.success', ['order' => $internalReference]),
@@ -46,17 +47,32 @@ class MercadoPagoService
             ],
             "back_urls" => $back_urls ,
             "auto_return" => "approved",
-            "external_reference" => $internalReference
+            "external_reference" => $internalReference,
+            
         ];
+            // Por padrÃ£o usa o token do marketplace
+        $accessToken = $this->accessToken;
+        if ($vendor) {
+            $valorTotal = (float) $data['items'][0]['unit_price'];
+
+            $applicationFee = round($valorTotal * 0.5, 2); // 3% de comissÃ£o
+            $valorVendedor = $valorTotal - $applicationFee;
+            $data['items'][0]['unit_price'] = $valorTotal;
+            $data['collector_id'] = (int) $vendor->mp_user_id;
+            $data['marketplace_fee'] = $applicationFee;
+            $accessToken = $vendor->mp_access_token;
+        }
+
 
         $payload = json_encode($data);
 
+Log::info('Informa«®«ªo registrada no log.'.json_encode( $payload));
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Content-Type: application/json",
-            "Authorization: Bearer " . $this->accessToken
+            "Authorization: Bearer " . $accessToken
         ]);
 
         $response = curl_exec($ch);

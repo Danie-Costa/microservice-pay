@@ -12,8 +12,8 @@ Route::get('/', function () {
 });
 
 
-// Route::get('/vendor/auth-url', [VendorController::class, 'authUrl']); // link para o cliente acessar o MP
-// Route::get('/vendor/oauth/callback', [VendorController::class, 'oauthCallback']); // callback do MP onde o cliente vai receber o token de acesso
+Route::get('/vendor-auth-url', [VendorController::class, 'authUrl']); // link para o cliente acessar o MP
+Route::get('/vendor-oauth/callback', [VendorController::class, 'oauthCallback'])->name('vendor.oauth.callback'); // callback do MP onde o cliente vai receber o token de acesso
 
 Route::middleware([CustomCorsMiddleware::class,CheckProjectAccess::class])->group(function () {
     Route::get('/vendor', [VendorController::class, 'index']);
